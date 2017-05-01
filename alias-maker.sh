@@ -27,32 +27,31 @@ validate_alias () {
   local Valid=`echo $Lower | tr -c -d [:lower:][:digit:]\-\_\.`
   if [ $Valid != $Lower ]; then 
     send_response "\"$Lower\" does not conform to alias format; please specify a different alias."
-	  return 1
+    return 1
   fi
 
   # check the length of the alias to avoid naughtiness
   local AliasLen=`echo ${#Lower}`
   if [ $AliasLen -gt 32 ]; then
     send_response "\"$Lower\" is too long; please specify a different alias."
-	  return 1
+    return 1
   fi
 
   # check the alias file to see if the desired alias already in use
-  local AliasFile="${RootDir}/etc/aliases"
-  local AliasExists=`awk -F : '{print $1}' $AliasFile | grep -c -w "$Lower"`
+  local AliasExists=`awk -F : '{print $1}' "${RootDir}/etc/aliases" | grep -c -w "$Lower"`
   if [ $AliasExists -gt 0 ]; then
     send_response "\"$Lower\" is already in use; please specify a different alias."
-	  return 1
+    return 1
   fi
 
   # check the users list to ensure alias isn't a real username
   local UserExists=`synouser --enum all | \
             grep -v "User Listed" | \
-					  awk -F @ '{print $1}' | \
-					  grep -c -w "$Lower"`
+            awk -F @ '{print $1}' | \
+            grep -c -w "$Lower"`
   if [ $UserExists -gt 0 ]; then
     send_response "\"$Lower\" is already in use; please specify a different alias."
-	  return 1
+    return 1
   fi
   
   return 0
